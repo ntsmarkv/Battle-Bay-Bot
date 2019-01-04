@@ -13,7 +13,7 @@ import traceback
 import logging
 
 
-TOKEN = ''
+TOKEN = '#tokenhere'
 CLIENT_ID = 'e3te3c43l83eqjeojupne0se5t681s'
 cooldowns = {}
 description = '''Battle Bay Bot
