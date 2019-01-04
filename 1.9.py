@@ -13,7 +13,7 @@ import traceback
 import logging
 
 
-TOKEN = '#tokenhere'
+TOKEN = ''
 CLIENT_ID = 'e3te3c43l83eqjeojupne0se5t681s'
 cooldowns = {}
 description = '''Battle Bay Bot
@@ -23,9 +23,6 @@ startup_extensions = ["Music"]
 #startup_extensions = ["config"]
 
 bot = commands.Bot(command_prefix='!', description=description)
-
-chat_filter = ["SHIT", "FUCK", "ASS", "pineapple"]
-bypass_list = []
 
 class EventMod():
     def __init__(self, channel, timeout, text, isEmbed=False):
@@ -143,12 +140,12 @@ async def on_member_join(member):
             json.dump(data, f)
 
 #    with open('users.json', 'r') as f:
- #       users = json.load(f)
-
-  #  await update_data(users, member)
-
+#        users = json.load(f)#
+#
+#    await update_data(users, member)#
+#
 #    with open('users.json', 'w') as f:
- #       json.dump(users, f)
+#        json.dump(users, f)
 #    await bot.send_message(discord.utils.get(member.server.channels, type=discord.ChannelType.text), embed=discord.Embed(colour=discord.Colour(0xFAA61A), description="If you need help use; !help."))
 
 
@@ -182,16 +179,16 @@ async def on_message(message):
                     with open('userdata.json', 'w') as f:
                         json.dump(data, f)
 
- #       with open('users.json', 'r') as f:
- #           users = json.load(f)
+#        with open('users.json', 'r') as f:
+#3            users = json.load(f)#
 #
 #        await update_data(users, message.author)
- #       await add_experience(users, message.author, 5)
-  #      await level_up(users, message.author, message.channel)
-   #     await add_bbp(users, message.author, 1)
-
+#        await add_experience(users, message.author, 5)
+#        await level_up(users, message.author, message.channel)
+#        await add_bbp(users, message.author, .75)#
+#
 #        with open('users.json', 'w') as f:
-  #          json.dump(users, f)
+#            json.dump(users, f)
 
     if message.content.startswith('!create'):
         writing = message.content
@@ -232,7 +229,8 @@ async def update_data(users, user):
         users[user.id]['experience'] = 0
         users[user.id]['level'] = 0
         users[user.id]['bbps'] = 1000
-
+        users[user.id]['infamy'] = 0
+        users[user.id]['gearscore'] = 0
 
 async def add_experience(users, user, exp):
     users[user.id]['experience'] += exp
@@ -295,32 +293,6 @@ class Member():
                 embed2.set_image(url=stuff[2])
                 await bot.say(embed=embed2)
 
-    @commands.command(pass_context=True)
-    async def Introduction(self, ctx, arg=None):
-        """Shows the Players Introduction of the tagged person!"""
-        if arg == None:
-            member = ctx.message.author.id
-            nickname = ctx.message.author.name
-            membObj = ctx.message.author
-        else:
-            member = ctx.message.mentions[0].id
-            nickname = ctx.message.mentions[0].name
-            membObj = ctx.message.mentions[0]
-        with open('background.json') as f:
-            profiles = json.load(f)
-        if member not in profiles:
-            await bot.say("That person does not have a Introduction!")
-        else:
-            stuff = profiles[member]
-            embed = discord.Embed(colour=discord.Colour(0xFAA61A), description="BIO **" + stuff[0] + "**")
-            if len(stuff) == 2 or len(stuff) == 3:
-                embed.set_image(url=stuff[1])
-            embed.set_author(name=nickname, icon_url=membObj.avatar_url)
-            await bot.say(embed=embed)
-            if len(stuff) == 3:
-                embed2 = discord.Embed(colour=discord.Colour(0xFAA61A))
-                embed2.set_image(url=stuff[2])
-                await bot.say(embed=embed2)
 
 
 #    @commands.command(pass_context=True)
