@@ -18,11 +18,24 @@ CLIENT_ID = 'e3te3c43l83eqjeojupne0se5t681s'
 cooldowns = {}
 description = '''Battle Bay Bot
 You can visit us Online @: http://battlebaydiscord.xyz/'''
-startup_extensions = ["Music"]
-#startup_extensions = ["run"]
-#startup_extensions = ["config"]
 
+chat_filter = ["SHIT", "FUCK", "ASS", "GAY"]
+bypass_list = []
 bot = commands.Bot(command_prefix='!', description=description)
+
+#startup_extensions = ["Chat-Filter"]
+#startup_extensions = ["Moderator"]
+#startup_extensions = ["Member"]
+#startup_extensions = ["cogload"]
+
+#if __name__ == "__main__":
+#    for extension in startup_extensions:
+#        try:
+#            bot.load_extension(extension)
+#        except Exception as e:
+#            exc = '{}:  {}'.format(type(e).__name__, e)
+#            print('Failed to load Extension {}\n{}'.format(extension, exc))
+
 
 class EventMod():
     def __init__(self, channel, timeout, text, isEmbed=False):
@@ -155,9 +168,21 @@ async def on_command_error(error, ctx):
         bot.send_message(ctx.message.channel, content='You get bbps every 24 hours!!! You have; %.2fs left! | Tip; You can donate your dailies to another member!' % error.retry_after)
     raise error  # re-raise the error so all the errors will still show up in console
 
-
+class Chatfilter():
+    def __init__(self, bot):
+        self.bot = bot
 @bot.event
 async def on_message(message):
+    contents = message.content.split(" ") #contents is a list type
+    for word in contents:
+        if word.upper() in chat_filter:
+            if not message.author.id in bypass_list:
+                try:
+                    await bot.delete_message(message)
+                    await bot.send_message(message.channel, "**Hey! You're not allowed to say that word!**")
+                except discord.errors.Notfound:
+                    return
+
     if message.author.id not in cooldowns:
         newPerson = {message.author.id: time.time()}
         cooldowns.update(newPerson)
@@ -179,6 +204,49 @@ async def on_message(message):
                     with open('userdata.json', 'w') as f:
                         json.dump(data, f)
 
+    if bot.user.mentioned_in(message) and message.mention_everyone is False:
+        if 'help' in message.content.lower():
+            await bot.send_message(message.channel, "Then use the; !help cmd!")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'ready' in message.content.lower():
+            await bot.send_message(message.channel, "Yes, I'm always ready.")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'how are you' in message.content.lower():
+            await bot.send_message(message.channel, "I'm Spectacular!!")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'name' in message.content.lower():
+            await bot.send_message(message.channel, "I call myself, Eliza. I'm a Quasi-Seismic Artificial Intelligence module.")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'hold' in message.content.lower():
+            await bot.send_message(message.channel, "Older then you!")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'eliza' in message.content.lower():
+            await bot.send_message(message.channel, "That's my Name, Stop Spamming me...")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'learn' in message.content.lower():
+            await bot.send_message(message.channel, "I learn from you asking me questions, though I may not respond back. I'm learning your language.")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'creator' in message.content.lower():
+            await bot.send_message(message.channel, "Shocky is my creator, he teaches me lots, but is afraid of what I may learn on the Internet.")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'single' in message.content.lower():
+            await bot.send_message(message.channel, "Not a question you should be asking.")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'update' in message.content.lower():
+            await bot.send_message(message.channel, "I'm not quite due for my update, I do automatically every hour or so.")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'invite' in message.content.lower():
+            await bot.send_message(message.channel, "Someone say Invite? https://discord.gg/ckCRj53")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if 'hello' in message.content.lower():
+            await bot.send_message(message.channel, "Greetings! how are you today?")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if '[MOD]' in message.content.lower():
+            await bot.send_message(message.channel, "a **[MOD]** is someone who enforces the chat rules for the community. **[MOD]**s help any way we can by answering questions. **[MOD]**s hold the power to **MUTE** you in-game and discord if you misbehave. They can escalate from there to **Support Team for a Game Ban for severe harrassment.**")
+            await bot.add_reaction(message, '👀')  # :eyes:
+        if '' in message.content.lower():
+            await bot.add_reaction(message, '👀')  # :eyes:
+    await bot.process_commands(message)
 #        with open('users.json', 'r') as f:
 #3            users = json.load(f)#
 #
@@ -263,8 +331,8 @@ class Member():
         await(await bot.ws.ping())
         after = time.monotonic()
         _ping = (after - before) * 1000
-        await bot.say("**Trip FROM me to you-->** :ping_pong: **{0:.0f}ms**".format(_ping))
-        await bot.say(ctx, "**Trip FROM Me to Rovio-->** :ping_pong: **{0:.0f}ms**".format(_ping))
+        await bot.say("**Trip | FROM Me to You-->** :ping_pong: **{0:.0f}ms**".format(_ping))
+        await bot.say(ctx,"**Trip | FROM Me to Rovio-->** :ping_pong: **{0:.0f}ms**".format(_ping))
 
     @commands.command(pass_context=True)
     async def profile(self, ctx, arg=None):
@@ -293,16 +361,6 @@ class Member():
                 embed2.set_image(url=stuff[2])
                 await bot.say(embed=embed2)
 
-
-
-#    @commands.command(pass_context=True)
-#    async def getupdate(self, ctx):
-#        """"""
-#        await bot.say("___**Checking for update:**___ ...........................................................")
-#        await bot.say("___**Accessing Servers:**___ PLEASE WAIT!! ................")
-#        await bot.say("___**Game Version**___ - **4.2.20442** January 4th, 2019 Possibly found, Attemtempting to get update")
-#        await bot.say("___**Android Version**___ - **Need Android Versions Check DM** For further information, as this is just a test.")
-
     @commands.command(pass_context=True)
     async def memberlist(self, ctx):
         """Shows how many users are using the bot"""
@@ -313,7 +371,7 @@ class Member():
         """Shows Information about the Battle Bay Community"""
         await bot.say("___**Community Information about Battle Bay**___")
         await bot.say("~22,411 Active Battlers!")
-        await bot.say("1,649 Discord Members! (12.3%)+2.3%")
+        await bot.say("2,701 Discord Members! (12.3%)+3.2%")
         await bot.say("14,943 Forum Members (~10874 Active)")
         await bot.say("___**Game Version**___ - **4.1.21728** December 3, 2018")
 #        await bot.say("___**Top 7 Guilds**___")
@@ -376,9 +434,10 @@ class Member():
 
     @commands.command()
     async def background(self):
-        """!create #BBTAG <picurl1.com> <picurl2.com>"""
+        """BIO test"""
 
     # this does nothing; just so that command shows up in help message and the client doesn't throw an error
+
 
     @commands.command(pass_context=True)
     async def rank(self, ctx, arg=None):
@@ -394,12 +453,13 @@ class Member():
             roleList.append(discord.utils.get(ctx.message.server.roles, name='Interceptor'))
             roleList.append(discord.utils.get(ctx.message.server.roles, name='Reaper'))
             roleList.append(discord.utils.get(ctx.message.server.roles, name='Guardian'))
+            roleList.append(discord.utils.get(ctx.message.server.roles, name='Notifications'))
 
             for grp in roleList:
                 await bot.remove_roles(ctx.message.author, *roleList)
 
         if arg == None:
-            await bot.say("Please pick a rank to join! (!rank speeder | !rank interceptor | !rank reaper | etc)")
+            await bot.say("Please pick a rank to join! (!rank speeder | !rank interceptor | !rank notifications | etc)")
         else:
             with open('groups.json') as f:
                 groups = json.load(f)
@@ -437,6 +497,10 @@ class Member():
             elif arg == "guardian":
                 group = ":Guardian:"
                 role = discord.utils.get(ctx.message.server.roles, name='Guardian')
+                await bot.add_roles(ctx.message.author, role)
+            elif arg == "notifications":
+                group = ":Notifications:"
+                role = discord.utils.get(ctx.message.server.roles, name='Notifications')
                 await bot.add_roles(ctx.message.author, role)
             else:
                 await bot.say("That is not a valid rank!")
@@ -610,15 +674,6 @@ class Member():
         await bot.send_message(ctx.message.channel, embed=embed)
 
 
-if __name__ == "__main__":
-    for extension in startup_extensions:
-        try:
-            bot.load_extension(extension)
-        except Exception as e:
-            exc = '{}:  {}'.format(type(e).__name__, e)
-            print('Failed to load Extension {}\n{}'.format(extension, exc))
-
-
 class Moderator():
     """Only Moderators can run these commands!"""
 
@@ -632,7 +687,7 @@ class Moderator():
     async def addpoints(self, ctx, useless, value: int):
         """Adds points to an account; used '!addpoints @username xxx' """
         roles = ctx.message.author.roles
-        role = discord.utils.get(ctx.message.server.roles, name='[BB19218BMOD]')
+        role = discord.utils.get(ctx.message.server.roles, name='#[BB19218BMOD]')
         if role in roles:
             mentions = ctx.message.mentions
             person = mentions[0]
@@ -964,7 +1019,7 @@ class Moderator():
         else:
             await self.bot.say("Nice try, only moderators can do that!")
 
-
+bot.add_cog(Chatfilter(bot))
 bot.add_cog(Moderator(bot))
 bot.add_cog(Member(bot))
 bot.loop.create_task(backgroundStream(asyncio.get_event_loop()))
