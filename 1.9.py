@@ -1,4 +1,5 @@
 ﻿import discord
+from bs4 import BeautifulSoup
 from discord.ext import commands
 import youtube_dl
 import json
@@ -11,6 +12,7 @@ import random
 import timeit
 import traceback
 import logging
+import codecs
 
 
 TOKEN = ''
@@ -204,49 +206,6 @@ async def on_message(message):
                     with open('userdata.json', 'w') as f:
                         json.dump(data, f)
 
-    if bot.user.mentioned_in(message) and message.mention_everyone is False:
-        if 'help' in message.content.lower():
-            await bot.send_message(message.channel, "Then use the; !help cmd!")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'ready' in message.content.lower():
-            await bot.send_message(message.channel, "Yes, I'm always ready.")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'how are you' in message.content.lower():
-            await bot.send_message(message.channel, "I'm Spectacular!!")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'name' in message.content.lower():
-            await bot.send_message(message.channel, "I call myself, Eliza. I'm a Quasi-Seismic Artificial Intelligence module.")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'hold' in message.content.lower():
-            await bot.send_message(message.channel, "Older then you!")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'eliza' in message.content.lower():
-            await bot.send_message(message.channel, "That's my Name, Stop Spamming me...")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'learn' in message.content.lower():
-            await bot.send_message(message.channel, "I learn from you asking me questions, though I may not respond back. I'm learning your language.")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'creator' in message.content.lower():
-            await bot.send_message(message.channel, "Shocky is my creator, he teaches me lots, but is afraid of what I may learn on the Internet.")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'single' in message.content.lower():
-            await bot.send_message(message.channel, "Not a question you should be asking.")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'update' in message.content.lower():
-            await bot.send_message(message.channel, "I'm not quite due for my update, I do automatically every hour or so.")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'invite' in message.content.lower():
-            await bot.send_message(message.channel, "Someone say Invite? https://discord.gg/ckCRj53")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if 'hello' in message.content.lower():
-            await bot.send_message(message.channel, "Greetings! how are you today?")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if '[MOD]' in message.content.lower():
-            await bot.send_message(message.channel, "a **[MOD]** is someone who enforces the chat rules for the community. **[MOD]**s help any way we can by answering questions. **[MOD]**s hold the power to **MUTE** you in-game and discord if you misbehave. They can escalate from there to **Support Team for a Game Ban for severe harrassment.**")
-            await bot.add_reaction(message, '👀')  # :eyes:
-        if '' in message.content.lower():
-            await bot.add_reaction(message, '👀')  # :eyes:
-    await bot.process_commands(message)
 #        with open('users.json', 'r') as f:
 #3            users = json.load(f)#
 #
@@ -1019,9 +978,51 @@ class Moderator():
         else:
             await self.bot.say("Nice try, only moderators can do that!")
 
+class Translate:
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(pass_context=True)
+    async def translate(self, ctx, to_language, *, msg):
+        """Translates words from one language to another. Do [p]help translate for more information.
+        Usage:
+        [p]translate <new language> <words> - Translate words from one language to another. Full language names must be used.
+        The original language will be assumed automatically.
+        """
+        await bot.message.delete()
+        if to_language == "rot13":  # little easter egg
+            embed = discord.Embed(color=discord.Color.blue())
+            embed.add_field(name="Original", value=msg, inline=False)
+            embed.add_field(name="ROT13", value=codecs.encode(msg, "rot_13"), inline=False)
+            return await bot.send("", embed=embed)
+        async with self.bot.session.get("https://gist.githubusercontent.com/astronautlevel2/93a19379bd52b351dbc6eef269efa0bc/raw/18d55123bc85e2ef8f54e09007489ceff9b3ba51/langs.json") as resp:
+            lang_codes = await resp.json(content_type='text/plain')
+        real_language = False
+        to_language = to_language.lower()
+        for entry in lang_codes:
+            if to_language in lang_codes[entry]["name"].replace(";", "").replace(",", "").lower().split():
+                language = lang_codes[entry]["name"].replace(";", "").replace(",", "").split()[0]
+                to_language = entry
+                real_language = True
+        if real_language:
+            async with self.bot.session.get("https://translate.google.com/m",
+                                        params={"hl": to_language, "sl": "auto", "q": msg}) as resp:
+                translate = await resp.text()
+            result = str(translate).split('class="t0">')[1].split("</div>")[0]
+            result = BeautifulSoup(result, "lxml").text
+            embed = discord.Embed(color=discord.Color.blue())
+            embed.add_field(name="Original", value=msg, inline=False)
+            embed.add_field(name=language, value=result.replace("&amp;", "&"), inline=False)
+            if result == msg:
+                embed.add_field(name="Warning", value="This language may not be supported by Google Translate.")
+            await bot.send("", embed=embed)
+        else:
+            await bot.send(self.bot.bot_prefix + "That's not a real language.")
+
 bot.add_cog(Chatfilter(bot))
 bot.add_cog(Moderator(bot))
 bot.add_cog(Member(bot))
+bot.add_cog(Translate(bot))
 bot.loop.create_task(backgroundStream(asyncio.get_event_loop()))
 
 bot.run(TOKEN)
