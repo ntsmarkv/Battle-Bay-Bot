@@ -13,6 +13,7 @@ import timeit
 import traceback
 import logging
 import codecs
+import re
 
 
 TOKEN = ''
@@ -21,7 +22,7 @@ cooldowns = {}
 description = '''Battle Bay Bot
 You can visit us Online @: http://battlebaydiscord.xyz/'''
 
-chat_filter = ["SHIT", "FUCK", "ASS", "GAY"]
+chat_filter = ["S\s*?H\s*?I\s*?T", "F\s*?U\s*?C\s*?K", "A\s*?S\s*?S", "G\s*?A\s*?Y"]
 bypass_list = []
 bot = commands.Bot(command_prefix='!', description=description)
 
@@ -175,13 +176,14 @@ class Chatfilter():
         self.bot = bot
 @bot.event
 async def on_message(message):
-    contents = message.content.split(" ") #contents is a list type
-    for word in contents:
-        if word.upper() in chat_filter:
+    contents = message.content
+    for cussWords in chat_filter:    
+        if(re.findall(cussWords,contents.upper()))
             if not message.author.id in bypass_list:
                 try:
                     await bot.delete_message(message)
                     await bot.send_message(message.channel, "**Hey! You're not allowed to say that word!**")
+                    break
                 except discord.errors.Notfound:
                     return
 
